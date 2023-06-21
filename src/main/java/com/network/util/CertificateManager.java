@@ -27,6 +27,9 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Map;
@@ -96,7 +99,7 @@ public class CertificateManager {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         try (InputStream inputStream = classLoader.getResourceAsStream("ca_private.der")) {
             Objects.requireNonNull(inputStream, "ca_private.der证书私钥不能文件不存在");
-            byte[] bytes =  Streams.readAll(inputStream);
+            byte[] bytes = Streams.readAll(inputStream);
             PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(bytes);
             this.caPriKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
         }
@@ -119,7 +122,9 @@ public class CertificateManager {
 
         try {
             String issuer = getIssuerByCert(caCert);
-            X509Certificate certificate = generate(serverKeyPair.getPublic(), caPriKey, issuer, caCert.getNotBefore(), caCert.getNotAfter(), host);
+            Date start = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+            Date end = Date.from(Instant.now().plus(365, ChronoUnit.DAYS));
+            X509Certificate certificate = generate(serverKeyPair.getPublic(), caPriKey, issuer, start, end, host);
             certificateMap.put(host, certificate);
             return new AbstractMap.SimpleEntry<>(serverKeyPair.getPrivate(), certificate);
         } catch (Exception e) {
