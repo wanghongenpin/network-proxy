@@ -1,17 +1,41 @@
 package com.network;
 
 
-import io.netty.buffer.ByteBufUtil;
+import com.network.util.CertificateManager;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.util.encoders.Base64Encoder;
+import sun.security.provider.X509Factory;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.Map;
+
+import static java.lang.System.out;
 
 class NetworkApplicationTests {
 
-    public static void main(String[] args) {
-        String code = "434f4e4e454354207361666562726f7773696e672e676f6f676c652e636f6d3a34343320485454502f312e310d0a486f73743a207361666562726f7773696e672e676f6f676c652e636f6d3a3434330d0a50726f78792d436f6e6e656374696f6e3a206b6565702d616c6976650d0a557365722d4167656e743a204d6f7a696c6c612f352e3020284d6163696e746f73683b20496e74656c204d6163204f5320582031305f31355f3729204170706c655765624b69742f3533372e333620284b48544d4c2c206c696b65204765636b6f29204368726f6d652f3131332e302e302e30205361666172692f3533372e33360d0a0d0a";
-        byte[] bytes = ByteBufUtil.decodeHexDump(code);
-        System.out.println(new String(bytes));
+    public static void main(String[] args) throws CertificateEncodingException, IOException {
+        Map.Entry<PrivateKey, X509Certificate> certificate = CertificateManager.getInstance().getCertificate("www.jianshu.com");
+        out.println(convertToPem(certificate.getValue()));
+//        out.println(convertToPem(certificate.getKey()));
+//        out.println(convertToPem(CertificateManager.getInstance().getServerKeyPair().getPublic()));
     }
 
     void contextLoads() {
+    }
+
+    public static  String convertToPem(Object x509Cert) throws IOException {
+        StringWriter sw = new StringWriter();
+        try (PEMWriter pw = new PEMWriter(sw)) {
+            pw.writeObject(x509Cert);
+        }
+        return sw.toString();
     }
 
 }

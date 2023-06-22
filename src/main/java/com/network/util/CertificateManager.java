@@ -149,6 +149,7 @@ public class CertificateManager {
         //SAN扩展证书支持的域名，否则浏览器提示证书不安全
         GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, host));
         jv3Builder.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
+//        jv3Builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
 
         //SHA256 用SHA1浏览器可能会提示证书不安全
         ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(caPriKey);
